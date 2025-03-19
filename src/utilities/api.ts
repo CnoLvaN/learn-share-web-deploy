@@ -1,7 +1,7 @@
 import axios, { AxiosInstance, AxiosRequestConfig } from "axios";
 
-// Получаем URL бекенда из переменной окружения Next.js
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL;
+// Удаляем прямое использование BACKEND_URL
+// const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export interface LoginData {
   email: string;
@@ -160,7 +160,8 @@ class ApiService {
 
   constructor() {
     this.api = axios.create({
-      baseURL: BACKEND_URL,
+      // Используем относительные URL вместо прямых обращений к BACKEND_URL
+      baseURL: "",
       headers: {
         "Content-Type": "application/json",
       },
