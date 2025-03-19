@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import https from "node:https";
 
 export async function POST(request: Request) {
   try {
@@ -15,14 +16,25 @@ export async function POST(request: Request) {
     // Получаем данные из запроса
     const body = await request.json();
 
-    // Перенаправляем запрос на внешний API
-    const response = await fetch(`${apiUrl}/auth/login`, {
+    // Установка опций для fetch с отключенной проверкой SSL (только на сервере)
+    const fetchOptions: RequestInit = {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(body),
+    };
+
+    // Для небезопасных HTTP запросов на сервере
+    // @ts-expect-error - agent опция доступна только в Node.js
+    fetchOptions.agent = new https.Agent({
+      rejectUnauthorized: false,
     });
+
+    console.log(`Sending request to ${apiUrl}/auth/login`);
+
+    // Перенаправляем запрос на внешний API
+    const response = await fetch(`${apiUrl}/auth/login`, fetchOptions);
 
     // Получаем ответ
     const data = await response.json();
@@ -32,7 +44,7 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("Error in login API route:", error);
     return NextResponse.json(
-      { message: "Internal server error" },
+      { message: "Internal server error", error: String(error) },
       { status: 500 }
     );
   }
